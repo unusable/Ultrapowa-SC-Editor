@@ -110,7 +110,7 @@ namespace ucssceditor
             return true;
         }
 
-        public override void ParseData(BinaryReader br)
+        public void ParseData2(BinaryReader br, bool encrypted)
         {
             m_vImageType = br.ReadByte();
 
@@ -122,7 +122,14 @@ namespace ucssceditor
             {
                 m_vImage = new ScImage();
             }
-            m_vImage.ParseImage(br);
+            m_vImage.ParseImage(br, encrypted);
+        }
+
+        public override void ParseData(BinaryReader br)
+        {
+            m_vImageType = br.ReadByte();
+            m_vImage = new ScImage();
+            m_vImage.ParseImage(br, false);
         }
 
         public override Bitmap Render(RenderingOptions options)
@@ -162,5 +169,7 @@ namespace ucssceditor
         {
             m_vOffset = position;
         }
+
+        
     }
 }

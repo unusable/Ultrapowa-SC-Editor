@@ -58,6 +58,25 @@ namespace ucssceditor
 
         public void Decode()
         {
+            using (var br2 = new BinaryReader(File.Open(m_vFileName + "_tex", FileMode.Open)))
+            {
+                try
+                {
+                    while (true)
+                    {
+                        byte FileType = br2.ReadByte();
+                        uint FileSize = br2.ReadUInt32();
+                        var texture = new Texture(this);
+                        texture.SetOffset(0);
+                        texture.ParseData2(br2, (FileType == 27 || FileType == 28));
+                        m_vTextures.Add(texture);
+                    }
+                }
+                catch(EndOfStreamException e)
+                {
+
+                }
+            }
             using (var br = new BinaryReader(File.Open(m_vFileName, FileMode.Open)))
             {
                 ushort m_vShapeCount = br.ReadUInt16();//a1 + 8
@@ -97,7 +116,7 @@ namespace ucssceditor
                     byte nameLength = br.ReadByte();
                     ((Export)m_vExports[i]).SetExportName(Encoding.UTF8.GetString(br.ReadBytes(nameLength)));
                 }
-
+                br.ReadBytes(10);
                 do
                 {
                     long offset = br.BaseStream.Position;
@@ -112,7 +131,7 @@ namespace ucssceditor
                                 var texture = new Texture(this);
                                 texture.SetOffset(offset);
                                 texture.ParseData(br);
-                                m_vTextures.Add(texture);
+                                //m_vTextures.Add(texture);
                                 continue;
                             }
                         case 2:

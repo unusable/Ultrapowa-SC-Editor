@@ -21,14 +21,15 @@ namespace ucssceditor
             return "RGB565";
         }
 
-        public override void ParseImage(BinaryReader br)
+        public override void ParseImage(BinaryReader br, bool encrypt)
         {
-            base.ParseImage(br);
+            base.ParseImage(br, encrypt);
             m_vBitmap = new Bitmap(m_vWidth, m_vHeight, PixelFormat.Format32bppArgb);
 
-            for (int column = 0; column < m_vHeight; column++)
+            List<Color> pixels = new List<Color>();
+            for (int column = 0; column < m_vWidth; column++)
             {
-                for (int row = 0; row < m_vWidth; row++)
+                for (int row = 0; row < m_vHeight; row++)
                 {
                     ushort color = br.ReadUInt16();
 
@@ -36,9 +37,11 @@ namespace ucssceditor
                     int green = (int)((color >> 5) & 0x3F) << 2;
                     int blue = (int)(color & 0X1F) << 3;
 
-                    m_vBitmap.SetPixel(row, column, Color.FromArgb(red, green, blue));
+                    pixels.Add(Color.FromArgb(red, green, blue));
                 }
             }
+
+            FillImage(pixels, encrypt);
         }
 
         public override void Print()
