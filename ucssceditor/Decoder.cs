@@ -64,11 +64,11 @@ namespace ucssceditor
                 {
                     while (true)
                     {
-                        byte FileType = br2.ReadByte();
-                        uint FileSize = br2.ReadUInt32();
+                        byte fileType = br2.ReadByte();
+                        uint fileSize = br2.ReadUInt32();
                         var texture = new Texture(this);
                         texture.SetOffset(0);
-                        texture.ParseData2(br2, (FileType == 27 || FileType == 28));
+                        texture.ParseData2(br2, fileType);
                         m_vTextures.Add(texture);
                     }
                 }
@@ -79,19 +79,19 @@ namespace ucssceditor
             }
             using (var br = new BinaryReader(File.Open(m_vFileName, FileMode.Open)))
             {
-                ushort m_vShapeCount = br.ReadUInt16();//a1 + 8
-                ushort m_vMovieClipCount = br.ReadUInt16();//a1 + 12
-                ushort m_vTextureCount = br.ReadUInt16();//a1 + 16
-                ushort m_vTextFieldCount = br.ReadUInt16();//a1 + 24
-                ushort m_vMatrix2x3Count = br.ReadUInt16();//a1 + 28
-                ushort m_vColorTransformCount = br.ReadUInt16();//a1 + 32
+                ushort shapeCount = br.ReadUInt16();//a1 + 8
+                ushort movieClipCount = br.ReadUInt16();//a1 + 12
+                ushort textureCount = br.ReadUInt16();//a1 + 16
+                ushort textFieldCount = br.ReadUInt16();//a1 + 24
+                ushort matrix2x3Count = br.ReadUInt16();//a1 + 28
+                ushort colorTransformCount = br.ReadUInt16();//a1 + 32
 
-                Debug.WriteLine("ShapeCount: " + m_vShapeCount);
-                Debug.WriteLine("MovieClipCount: " + m_vMovieClipCount);
-                Debug.WriteLine("TextureCount: " + m_vTextureCount);
-                Debug.WriteLine("TextFieldCount: " + m_vTextFieldCount);
-                Debug.WriteLine("Matrix2x3Count: " + m_vMatrix2x3Count);
-                Debug.WriteLine("ColorTransformCount: " + m_vColorTransformCount);
+                Log("ShapeCount: " + shapeCount);
+                Log("MovieClipCount: " + movieClipCount);
+                Log("TextureCount: " + textureCount + " -- " + m_vTextures.Count);
+                Log("TextFieldCount: " + textFieldCount);
+                Log("Matrix2x3Count: " + matrix2x3Count);
+                Log("ColorTransformCount: " + colorTransformCount);
 
                 //5 useless bytes, not even used by Supercell
                 br.ReadByte();//1 octet
@@ -100,7 +100,7 @@ namespace ucssceditor
 
                 m_vStartExportsOffset = br.BaseStream.Position;
                 m_vExportCount = br.ReadUInt16();//a1 + 20
-                Debug.WriteLine("ExportCount: " + m_vExportCount);
+                Log("ExportCount: " + m_vExportCount);
 
                 for (int i = 0; i < m_vExportCount; i++)
                 {
@@ -116,7 +116,11 @@ namespace ucssceditor
                     byte nameLength = br.ReadByte();
                     ((Export)m_vExports[i]).SetExportName(Encoding.UTF8.GetString(br.ReadBytes(nameLength)));
                 }
-                br.ReadBytes(10);
+                while(0x1A != br.ReadByte())
+                {
+                    br.ReadInt32();
+                }
+                br.ReadInt32();
                 do
                 {
                     long offset = br.BaseStream.Position;
@@ -132,6 +136,16 @@ namespace ucssceditor
                                 texture.SetOffset(offset);
                                 texture.ParseData(br);
                                 //m_vTextures.Add(texture);
+                                textureCount--;
+                                continue;
+                            }
+                        case 24:
+                            {
+                                var texture = new Texture(this);
+                                texture.SetOffset(offset);
+                                texture.ParseData(br);
+                                //m_vTextures.Add(texture);
+                                textureCount--;
                                 continue;
                             }
                         case 2:
@@ -141,6 +155,7 @@ namespace ucssceditor
                                 shape.SetOffset(offset);
                                 m_vShapes.Add(shape);
                                 shape.ParseData(br);
+                                shapeCount--;
                                 continue;
                             }
                         case 3:
@@ -152,32 +167,38 @@ namespace ucssceditor
                                 movieClip.SetOffset(offset);
                                 movieClip.ParseData(br);
                                 m_vMovieClips.Add(movieClip);
+                                movieClipCount--;
                                 continue;
                             }
                         case 7:
                         case 15:
                         case 20:
+                        case 25:
                             {
                                 //textFields
+                                textFieldCount--;
                                 break;
                             }
                         case 8:
                             {
                                 //matrix2x3
+                                matrix2x3Count--;
                                 break;
                             }
                         case 9:
                             {
                                 //colorTransform
+                                colorTransformCount--;
                                 break;
                             }
                         case 13:
                             {
+                                Log("*** data type " + dataType.ToString());
                                 break;
                             }
                         default:
                             {
-                                Debug.WriteLine("Unkown data type " + dataType.ToString());
+                                Log("Unkown data type " + dataType.ToString());
                                 break;
                             }
                         case 0:
@@ -189,15 +210,25 @@ namespace ucssceditor
                                     if (index != -1)
                                         ((Export)m_vExports[i]).SetDataObject((MovieClip)m_vMovieClips[index]);
                                 }
+
+                                Log("-----------------------------------");
+                                Log("ShapeCount: " + shapeCount);
+                                Log("MovieClipCount: " + movieClipCount);
+                                Log("TextureCount: " + textureCount);
+                                Log("TextFieldCount: " + textFieldCount);
+                                Log("Matrix2x3Count: " + matrix2x3Count);
+                                Log("ColorTransformCount: " + colorTransformCount);
                                 return;
                             }
                     }
+                    //Log("Unhandled data type " + dataType.ToString());
                     if (dataLength >= 1)
                     {
                         br.ReadBytes(dataLength);
                     }
                 }
                 while (true);
+
             }
         }
 
@@ -269,6 +300,11 @@ namespace ucssceditor
         public void SetStartExportsOffset(long offset)
         {
             m_vStartExportsOffset = offset;
+        }
+
+        private void Log(string content)
+        {
+            Debug.WriteLine(content);
         }
     }
 }

@@ -21,9 +21,9 @@ namespace ucssceditor
             return "RGB8888";
         }
 
-        public override void ParseImage(BinaryReader br, bool encrypt)
+        public override void ParseImage(BinaryReader br, byte fileType)
         {
-            base.ParseImage(br, encrypt);
+            base.ParseImage(br, fileType);
             m_vBitmap = new Bitmap(m_vWidth, m_vHeight, PixelFormat.Format32bppArgb);
 
             List<Color> pixels = new List<Color>(m_vHeight * m_vWidth);
@@ -39,7 +39,7 @@ namespace ucssceditor
                     pixels.Add(Color.FromArgb((int)((a << 24) | (r << 16) | (g << 8) | b)));
                 }
             }
-            FillImage(pixels, encrypt);
+            FillImage(pixels, fileType);
         }
 
         public override void Print()

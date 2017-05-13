@@ -95,7 +95,7 @@ namespace ucssceditor
 
         public override void ParseData(BinaryReader br)
         {
-            Debug.WriteLine("Parsing chunk data from shape " + m_vShapeId);
+            Log("Parsing chunk data from shape " + m_vShapeId);
             m_vOffset = br.BaseStream.Position;
             m_vTextureId = br.ReadByte();//00
             byte shapePointCount = br.ReadByte();//04
@@ -106,7 +106,7 @@ namespace ucssceditor
                 float x = (float)(br.ReadInt32() * 0.05);//* 0.05);
                 float y = (float)(br.ReadInt32() * 0.05);//* 0.05);
                 m_vPointsXY.Add(new PointF(x,y));
-                Debug.WriteLine("x: " + x + ", y: " + y);
+                Log("x: " + x + ", y: " + y);
             }
             if (m_vChunkType == 22)
             {
@@ -115,7 +115,7 @@ namespace ucssceditor
                     float u = (float)(br.ReadUInt16() / 65535.0)*texture.GetImage().GetWidth();
                     float v = (float)(br.ReadUInt16() / 65535.0)*texture.GetImage().GetHeight();
                     m_vPointsUV.Add(new PointF(u, v));
-                    Debug.WriteLine("u: " + u + ", v: " + v);
+                    Log("u: " + u + ", v: " + v);
                 }
             }
             else
@@ -125,24 +125,24 @@ namespace ucssceditor
                     ushort u = br.ReadUInt16();// image.Width);
                     ushort v = br.ReadUInt16();// image.Height);//(short) (65535 * br.ReadInt16() / image.Height);
                     m_vPointsUV.Add(new Point(u, v));
-                    Debug.WriteLine("u: " + u + ", v: " + v);
+                    Log("u: " + u + ", v: " + v);
                 }
             }
         }
 
         public override Bitmap Render(RenderingOptions options)
         {
-            Debug.WriteLine("Rendering chunk from shape " + m_vShapeId);
+            Log("Rendering chunk from shape " + m_vShapeId);
             Bitmap result = null;
             var texture = (Texture)m_vStorageObject.GetTextures()[m_vTextureId];
             if (texture != null)
             {
                 Bitmap bitmap = texture.GetBitmap();
 
-                Debug.WriteLine("Rendering polygon image of " + GetPointsUV().Count.ToString() + " points");
+                Log("Rendering polygon image of " + GetPointsUV().Count.ToString() + " points");
                 foreach(PointF uv in GetPointsUV())
                 {
-                    Debug.WriteLine("u: " + uv.X + ", v: " + uv.Y);
+                    Log("u: " + uv.X + ", v: " + uv.Y);
                 }
           
                 GraphicsPath gpuv = new GraphicsPath();
@@ -150,10 +150,10 @@ namespace ucssceditor
 
                 int gpuvWidth = Rectangle.Round(gpuv.GetBounds()).Width;
                 gpuvWidth = gpuvWidth > 0 ? gpuvWidth : 1;
-                Debug.WriteLine("gpuvWidth: " + gpuvWidth);
+                Log("gpuvWidth: " + gpuvWidth);
                 int gpuvHeight = Rectangle.Round(gpuv.GetBounds()).Height;
                 gpuvHeight = gpuvHeight > 0 ? gpuvHeight : 1;
-                Debug.WriteLine("gpuvHeight: " + gpuvHeight);
+                Log("gpuvHeight: " + gpuvHeight);
                 var shapeChunk = new Bitmap(gpuvWidth, gpuvHeight);
 
                 int chunkX = Rectangle.Round(gpuv.GetBounds()).X;
@@ -264,6 +264,11 @@ namespace ucssceditor
         public void SetTextureId(byte id)
         {
             m_vTextureId = id;
+        }
+
+        private void Log(string content)
+        {
+            //Debug.WriteLine(content);
         }
     }
 }

@@ -21,9 +21,9 @@ namespace ucssceditor
             return "RGB565";
         }
 
-        public override void ParseImage(BinaryReader br, bool encrypt)
+        public override void ParseImage(BinaryReader br, byte fileType)
         {
-            base.ParseImage(br, encrypt);
+            base.ParseImage(br, fileType);
             m_vBitmap = new Bitmap(m_vWidth, m_vHeight, PixelFormat.Format32bppArgb);
 
             List<Color> pixels = new List<Color>();
@@ -41,7 +41,7 @@ namespace ucssceditor
                 }
             }
 
-            FillImage(pixels, encrypt);
+            FillImage(pixels, fileType);
         }
 
         public override void Print()

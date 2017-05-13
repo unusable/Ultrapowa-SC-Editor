@@ -108,7 +108,7 @@ namespace ucssceditor
             StringBuilder hex = new StringBuilder(data.Length * 2);
             foreach (byte b in data)
                 hex.AppendFormat("{0:x2}", b);
-            Debug.WriteLine(hex.ToString());
+            Log(hex.ToString());
             */
 
             m_vShapeId = br.ReadInt16();//0000
@@ -138,7 +138,7 @@ namespace ucssceditor
                 }
                 if (chunkType == 0)
                     break;
-                Debug.WriteLine("Unmanaged chunk type " + chunkType);
+                Log("Unmanaged chunk type " + chunkType);
                 br.ReadBytes(m_vLength);
             }
         }
@@ -146,27 +146,27 @@ namespace ucssceditor
         public override Bitmap Render(RenderingOptions options)
         {
             /*
-            Debug.WriteLine("XY:");
+            Log("XY:");
             foreach(ShapeChunk chunk in m_vChunks)
             {
                 foreach(var p in chunk.GetPointsXY())
                 {
-                    Debug.WriteLine("x: " + p.X + ", y: " + p.Y);
+                    Log("x: " + p.X + ", y: " + p.Y);
                 }
-                Debug.WriteLine("");
+                Log("");
             }
 
             foreach (ShapeChunk chunk in m_vChunks)
             {
                 foreach (var p in chunk.GetPointsUV())
                 {
-                    Debug.WriteLine("u: " + p.X + ", u: " + p.Y);
+                    Log("u: " + p.X + ", u: " + p.Y);
                 }
-                Debug.WriteLine("");
+                Log("");
             }
             */
 
-            Debug.WriteLine("Rendering image of " + m_vChunks.Count.ToString() + " polygons");
+            Log("Rendering image of " + m_vChunks.Count.ToString() + " polygons");
 
             //Calculate et initialize the final shape size
             List<PointF> pointsXY = m_vChunks.SelectMany(chunk => ((ShapeChunk)chunk).GetPointsXY()).ToList();
@@ -311,7 +311,7 @@ namespace ucssceditor
                         {
                             break;
                         }
-                        Debug.WriteLine("Unmanaged shape type " + shapeType);
+                        Log("Unmanaged shape type " + shapeType);
                         for(int i=0;i<BitConverter.ToInt32(length,0);i++)
                         {
                             input.WriteByte((byte)readInput.ReadByte());
@@ -332,6 +332,11 @@ namespace ucssceditor
         public void SetOffset(long offset)
         {
             m_vOffset = offset;
+        }
+
+        private void Log(string content)
+        {
+            //Debug.WriteLine(content);
         }
     }
 }

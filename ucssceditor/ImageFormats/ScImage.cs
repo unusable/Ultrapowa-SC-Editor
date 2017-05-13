@@ -47,7 +47,7 @@ namespace ucssceditor
             return m_vWidth;
         }
 
-        public virtual void ParseImage(BinaryReader br, bool encrypt)
+        public virtual void ParseImage(BinaryReader br, byte fileType)
         {
             m_vWidth = br.ReadUInt16();
             m_vHeight = br.ReadUInt16();
@@ -55,8 +55,8 @@ namespace ucssceditor
 
         public virtual void Print()
         {
-            Debug.WriteLine("Width: " + m_vWidth.ToString());
-            Debug.WriteLine("Height: " + m_vHeight.ToString());
+            Log("Width: " + m_vWidth.ToString());
+            Log("Height: " + m_vHeight.ToString());
         }
 
         public void SetBitmap(Bitmap b)
@@ -72,10 +72,10 @@ namespace ucssceditor
             input.Write(BitConverter.GetBytes(m_vHeight), 0, 2);
         }
 
-        public void FillImage(List<Color> pixels, bool encrypted)
+        public void FillImage(List<Color> pixels, byte fileType)
         {
             // from this part all of codes just converted to csharp with comments                    
-            if (!encrypted)
+            if (fileType != 27 && fileType != 28)
             {
                 int iSrcPix = 0;
                 for (int column = 0; column < m_vWidth; column++)
@@ -131,6 +131,11 @@ namespace ucssceditor
                     }
                 }
             }
+        }
+
+        private void Log(string content)
+        {
+            //Debug.WriteLine(content);
         }
 
     }

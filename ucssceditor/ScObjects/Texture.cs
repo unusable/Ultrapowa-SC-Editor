@@ -11,6 +11,7 @@ namespace ucssceditor
 {
     class Texture : ScObject
     {
+        private byte m_vFileType;
         private byte m_vImageType;
         private ScImage m_vImage;
         private short m_vTextureId;
@@ -34,6 +35,7 @@ namespace ucssceditor
 
         public Texture(Texture t)
         {
+            m_vFileType = t.m_vFileType;
             m_vImageType = t.GetImageType();
             m_vStorageObject = t.GetStorageObject();
             m_vTextureId = (short)m_vStorageObject.GetTextures().Count();
@@ -82,6 +84,7 @@ namespace ucssceditor
         public override string GetInfo()
         {
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine("FileType: " + m_vFileType);
             sb.AppendLine("TextureId: " + m_vTextureId);
             sb.AppendLine("ImageType: " + m_vImageType.ToString());
             sb.AppendLine("ImageFormat: " + m_vImage.GetImageTypeName());
@@ -110,8 +113,9 @@ namespace ucssceditor
             return true;
         }
 
-        public void ParseData2(BinaryReader br, bool encrypted)
+        public void ParseData2(BinaryReader br, byte fileType)
         {
+            m_vFileType = fileType;
             m_vImageType = br.ReadByte();
 
             if (m_vScImageTypes.ContainsKey(m_vImageType))
@@ -122,14 +126,14 @@ namespace ucssceditor
             {
                 m_vImage = new ScImage();
             }
-            m_vImage.ParseImage(br, encrypted);
+            m_vImage.ParseImage(br, fileType);
         }
 
         public override void ParseData(BinaryReader br)
         {
             m_vImageType = br.ReadByte();
             m_vImage = new ScImage();
-            m_vImage.ParseImage(br, false);
+            m_vImage.ParseImage(br, 0);
         }
 
         public override Bitmap Render(RenderingOptions options)

@@ -120,11 +120,11 @@ namespace ucssceditor
         public override void ParseData(BinaryReader br)
         {
             
-            Debug.WriteLine("MovieClip data type: " + m_vDataType);
+            //Log("MovieClip data type: " + m_vDataType);
             /*StringBuilder hex = new StringBuilder(data.Length * 2);
             foreach (byte b in data)
                 hex.AppendFormat("{0:x2}", b);
-            Debug.WriteLine(hex.ToString());*/
+            Log(hex.ToString());*/
 
             m_vClipId = br.ReadInt16();
             br.ReadByte();//a1 + 34
@@ -188,7 +188,7 @@ namespace ucssceditor
                 }
                 if (v26 == 0)
                     break;
-                Debug.WriteLine("Unknown tag " + v26.ToString());
+                Log("Unknown tag " + v26.ToString());
             }
         }
 
@@ -327,7 +327,7 @@ namespace ucssceditor
                         }
                         if (v26 == 0)
                             break;
-                        Debug.WriteLine("Unknown tag " + v26.ToString());
+                        Log("Unknown tag " + v26.ToString());
                     }        
                 }
                 m_vOffset = m_vStorageObject.GetEofOffset();
@@ -344,6 +344,11 @@ namespace ucssceditor
         public void SetOffset(long position)
         {
             m_vOffset = position;
+        }
+
+        private void Log(string content)
+        {
+            //Debug.WriteLine(content);
         }
     }
 }
