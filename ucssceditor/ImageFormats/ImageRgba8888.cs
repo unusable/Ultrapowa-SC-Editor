@@ -26,7 +26,7 @@ namespace ucssceditor
             base.ParseImage(br, encrypt);
             m_vBitmap = new Bitmap(m_vWidth, m_vHeight, PixelFormat.Format32bppArgb);
 
-            List<Color> pixels = new List<Color>();
+            List<Color> pixels = new List<Color>(m_vHeight * m_vWidth);
             for (int column = 0; column < m_vHeight; column++)
             {
                 for (int row = 0; row < m_vWidth; row++)

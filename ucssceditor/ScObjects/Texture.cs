@@ -14,17 +14,21 @@ namespace ucssceditor
         private byte m_vImageType;
         private ScImage m_vImage;
         private short m_vTextureId;
-        private Dictionary<byte, Type> m_vScImageTypes;
         private Decoder m_vStorageObject;
         private long m_vOffset;
+        private static Dictionary<byte, Type> m_vScImageTypes;
 
-        public Texture(Decoder scs)
+        static Texture()
         {
-            m_vStorageObject = scs;
             m_vScImageTypes = new Dictionary<byte, Type>();
             m_vScImageTypes.Add(0, typeof(ImageRgba8888));
             m_vScImageTypes.Add(2, typeof(ImageRgba4444));
             m_vScImageTypes.Add(4, typeof(ImageRgb565));
+        }
+
+        public Texture(Decoder scs)
+        {
+            m_vStorageObject = scs;
             m_vTextureId = (short)m_vStorageObject.GetTextures().Count();
         }
 
@@ -33,10 +37,6 @@ namespace ucssceditor
             m_vImageType = t.GetImageType();
             m_vStorageObject = t.GetStorageObject();
             m_vTextureId = (short)m_vStorageObject.GetTextures().Count();
-            m_vScImageTypes = new Dictionary<byte, Type>();
-            m_vScImageTypes.Add(0, typeof(ImageRgba8888));
-            m_vScImageTypes.Add(2, typeof(ImageRgba4444));
-            m_vScImageTypes.Add(4, typeof(ImageRgb565));
             if (m_vScImageTypes.ContainsKey(m_vImageType))
             {
                 m_vImage = (ScImage)Activator.CreateInstance(m_vScImageTypes[m_vImageType]);
