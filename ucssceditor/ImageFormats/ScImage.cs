@@ -91,10 +91,14 @@ namespace ucssceditor
             {
                 int iSrcPix = 0;
 
-                for (int l = 0; l < Math.Floor((decimal)m_vHeight / 32); l++) //block of 32 lines
+                int blockRow = m_vHeight >> 5;
+                int blockColumn = m_vWidth >> 5;
+                int leftY = m_vHeight & 0x001F;
+                int leftX = m_vWidth & 0x001F;
+                for (int l = 0; l < blockRow; l++) //block of 32 lines
                 {
                     // normal 32-pixels blocks
-                    for (int k = 0; k < Math.Floor((decimal)m_vWidth / 32); k++) // 32-pixels blocks in a line
+                    for (int k = 0; k < blockColumn; k++) // 32-pixels blocks in a line
                     {
                         for (int j = 0; j < 32; j++) // line in a multi line block
                         {
@@ -110,24 +114,32 @@ namespace ucssceditor
                     // line end blocks
                     for (int j = 0; j < 32; j++)
                     {
-                        for (int h = 0; h < GetWidth() % 32; h++)
+                        for (int h = 0; h < leftX; h++)
                         {
-                            this.m_vBitmap.SetPixel((h + (m_vWidth - (m_vWidth % 32))), (j + (l * 32)), pixels[iSrcPix]);
+                            this.m_vBitmap.SetPixel((blockColumn << 5) + h, (l << 5) + j, pixels[iSrcPix]);
                             iSrcPix++;
                         }
                     }
                 }
 
                 // final lines
-                for (int k = 0; k < Math.Floor((decimal)m_vWidth / 32); k++) // 32-pixels blocks in a line
+                for (int k = 0; k < blockColumn; k++) // 32-pixels blocks in a line
                 {
-                    for (int j = 0; j < (m_vHeight % 32); j++) // line in a multi line block
+                    for (int j = 0; j < leftY; j++) // line in a multi line block
                     {
                         for (int h = 0; h < 32; h++) // pixels in a 32-pixels-block
                         {
-                            this.m_vBitmap.SetPixel((h + (k * 32)), (j + (m_vHeight - (m_vHeight % 32))), pixels[iSrcPix]);
+                            this.m_vBitmap.SetPixel((k << 5) + h, (blockRow << 5) + j, pixels[iSrcPix]);
                             iSrcPix++;
                         }
+                    }
+                }
+                for (int j = 0; j < leftY; j++)
+                {
+                    for (int h = 0; h < leftX; h++)
+                    {
+                        this.m_vBitmap.SetPixel((blockColumn << 5) + h, (blockRow << 5) + j, pixels[iSrcPix]);
+                        iSrcPix++;
                     }
                 }
             }
