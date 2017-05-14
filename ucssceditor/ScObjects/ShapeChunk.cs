@@ -130,7 +130,7 @@ namespace ucssceditor
             }
         }
 
-        public override Bitmap Render(RenderingOptions options)
+        public Bitmap Render2(RenderingOptions options)
         {
             Log("Rendering chunk from shape " + m_vShapeId);
             Bitmap result = null;
@@ -140,11 +140,11 @@ namespace ucssceditor
                 Bitmap bitmap = texture.GetBitmap();
 
                 Log("Rendering polygon image of " + GetPointsUV().Count.ToString() + " points");
-                foreach(PointF uv in GetPointsUV())
+                foreach (PointF uv in GetPointsUV())
                 {
                     Log("u: " + uv.X + ", v: " + uv.Y);
                 }
-          
+
                 GraphicsPath gpuv = new GraphicsPath();
                 gpuv.AddPolygon(GetPointsUV().ToArray());
 
@@ -158,7 +158,7 @@ namespace ucssceditor
 
                 int chunkX = Rectangle.Round(gpuv.GetBounds()).X;
                 int chunkY = Rectangle.Round(gpuv.GetBounds()).Y;
- 
+
                 //bufferizing shape
                 using (Graphics g = Graphics.FromImage(shapeChunk))
                 {
@@ -167,10 +167,62 @@ namespace ucssceditor
                     g.SetClip(gpuv);
                     g.DrawImage(bitmap, -chunkX, -chunkY);
                     if (options.ViewPolygons)
-                        g.DrawPath(new Pen(Color.DarkGray, 2), gpuv); 
+                        g.DrawPath(new Pen(Color.DarkGray, 2), gpuv);
                 }
 
                 result = shapeChunk;
+            }
+            return result;
+        }
+        public override Bitmap Render(RenderingOptions options)
+        {
+            Log("Rendering chunk from shape " + m_vShapeId);
+            Bitmap result = null;
+            var texture = (Texture)m_vStorageObject.GetTextures()[m_vTextureId];
+            if (texture != null)
+            {
+                Bitmap bitmap = texture.GetBitmap();
+
+                Log("Rendering polygon image of " + GetPointsUV().Count.ToString() + " points");
+                foreach (PointF uv in GetPointsUV())
+                {
+                    Log("u: " + uv.X + ", v: " + uv.Y);
+                }
+
+                GraphicsPath gpuv = new GraphicsPath();
+                gpuv.AddPolygon(GetPointsUV().ToArray());
+
+                int gpuvWidth = Rectangle.Round(gpuv.GetBounds()).Width;
+                gpuvWidth = gpuvWidth > 0 ? gpuvWidth : 1;
+                Log("gpuvWidth: " + gpuvWidth);
+                int gpuvHeight = Rectangle.Round(gpuv.GetBounds()).Height;
+                gpuvHeight = gpuvHeight > 0 ? gpuvHeight : 1;
+                Log("gpuvHeight: " + gpuvHeight);
+                var shapeChunk = new Bitmap(gpuvWidth, gpuvHeight);
+
+                int chunkX = Rectangle.Round(gpuv.GetBounds()).X;
+                int chunkY = Rectangle.Round(gpuv.GetBounds()).Y;
+
+                //bufferizing shape
+                //using (Graphics g = Graphics.FromImage(shapeChunk))
+                //{
+                //    //On conserve la qualité de l'image intacte
+                //    gpuv.Transform(new Matrix(1, 0, 0, 1, -chunkX, -chunkY));
+                //    g.SetClip(gpuv);
+                //    g.DrawImage(bitmap, -chunkX, -chunkY);
+                //    if (options.ViewPolygons)
+                //        g.DrawPath(new Pen(Color.DarkGray, 2), gpuv);
+                //}
+                List<VetexPair> pairs = new List<VetexPair>();
+                pairs.Add(new VetexPair(0, GetPointsUV().Count - 1));
+                for (int i = 0; i < GetPointsUV().Count - 1; i++)
+                {
+                    pairs.Add(new VetexPair(i, i+1));
+                }
+                Polygon p = new Polygon(GetPointsUV().ToArray(), pairs.ToArray());
+                ClipRegion region2 = new ClipRegion(Rectangle.Round(gpuv.GetBounds()), p);
+                result = region2.ClipBitmap(bitmap);
+                //result = shapeChunk;
             }
             return result;
         }
