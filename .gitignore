@@ -45,3 +45,8 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+/ucssceditor/bin
+/ucssceditor/obj
+/packages
+/*.suo
+/.vs
